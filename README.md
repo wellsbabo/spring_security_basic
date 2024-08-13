@@ -82,6 +82,6 @@ UserDetailService를 통해 UserDetails를 생성해서 SecurityConfig로 보내
 
 = 시큐리티를 통해 인증을 진행하는 방법은 사용자가 Login 페이지를 통해 아이디, 비밀번호를 POST 요청시 스프링 시큐리티가 데이터베이스에 저장된 회원 정보를 조회 후 비밀번호를 검증하고 서버 세션 저장소에 해당 아이디에 대한 세션을 저장한다.
 
-
-
+### 세션 사용자 아이디 정보
+`SecurityContextHolder.getContext().getAuthentication().getName();`
 
