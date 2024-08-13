@@ -19,6 +19,16 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 );
 
+        http
+                .formLogin((auth) -> auth
+                        .loginPage("/login")    // 리다이렉팅될 로그인 페이지 경로
+                        .loginProcessingUrl("/loginProc")   // 시큐리티가 로그인 처리를 진행해줄 경로. 어차피 html안에 내용있으니까 될줄알았는데 이 설정 없으면 로그인 처리 안됨
+                        .permitAll()    // 모두가 들어올 수 있도록 설정
+                );
+
+        http
+                .csrf((auth) -> auth.disable());
+
         return http.build();
     }
 }
