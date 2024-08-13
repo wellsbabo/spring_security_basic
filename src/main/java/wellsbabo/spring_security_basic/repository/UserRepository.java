@@ -4,5 +4,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import wellsbabo.spring_security_basic.entity.UserEntity;
 
 public interface UserRepository extends JpaRepository<UserEntity, Integer> {
-    boolean existByUsername(String username);
+    boolean existsByUsername(String username);
+
+    UserEntity findByUsername(String username);
 }
