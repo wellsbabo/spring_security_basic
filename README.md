@@ -40,3 +40,26 @@
 - 스프링 시큐리티는 사용자 인증(로그인)시 비밀번호에 대해 단방향 해시 암호화를 진행하여 저장되어 있는 비밀번호와 대조한다.
 - 따라서 회원가입시 비밀번호 항목에 대해서 암호화를 진행해야 한다.
 - 스프링 시큐리티는 암호화를 위해 BCrypt Password Encoder를 제공하고 권장한다. 따라서 해당 클래스를 return하는 메소드를 만들어 @Bean으로 등록하여 사용하면 된다.
+
+### 회원가입
+유저 엔티티를 만들때 권한 컬럼이 필수적으로 들어가야한다
+```JAVA
+@Entity
+@Setter
+@Getter
+public class UserEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+
+    private String username;
+    private String password;
+
+    private String role;    // 필수적으로 들어가야함
+}
+```
+그리고 회원가입 진행시 권한 데이터를 넣을때 사용되는 포맷이 `ROLE_`을 접두사로 붙여서 권한을 붙여주면된다
+
+form 태그 관련 질문
+- Q. post라 @RequestBody를 해야한다고 생각하는데 오히려 사용하면 에러가 나고 왜 @Setter를 해야 값이 매핑되는건가요? @AllArgsConstructor는 값을 넣어줄수 없는건가요?
+- 일반적인 form태그에서 보내시면 multipart/form-data 형식으로 보내지기 때문에 json이 아닌 상태로 전송됩니다.따라서 @RequestBody로 받으실 수 없습니다.
