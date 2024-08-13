@@ -7,6 +7,7 @@ import wellsbabo.spring_security_basic.entity.UserEntity;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 
 @RequiredArgsConstructor
 public class CustomUserDetails implements UserDetails {
@@ -73,5 +74,18 @@ public class CustomUserDetails implements UserDetails {
     public boolean isEnabled() {
 //        return UserDetails.super.isEnabled();
         return true;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        CustomUserDetails that = (CustomUserDetails) o;
+        return Objects.equals(userEntity, that.userEntity); // 고유 식별자(ID)를 기준으로 비교
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(userEntity);    // 고유 식별자(ID)를 기준으로 해시코드 생성
     }
 }

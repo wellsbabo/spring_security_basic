@@ -85,3 +85,25 @@ UserDetailService를 통해 UserDetails를 생성해서 SecurityConfig로 보내
 ### 세션 사용자 아이디 정보
 `SecurityContextHolder.getContext().getAuthentication().getName();`
 
+### 세션 설정
+사용자가 로그인을 진행한 뒤 사용자 정보는 SecurityContextHolder에 의해서 서버 세션에 관리된다
+
+그리고 해당 세션에 대한 세션ID는 사용자에게 쿠키로 반환된다
+
+ㅇ때 세션에 관해 소멸 시간, 아이디당 세션 생성 개수(다중 로그인) 등을 설정할 수 있다
+
+(JWT 같은 경우는 세션에 계속 머무는게 아닌 세션이 Stateless 상태로 관린된다)
+
+#### 세션 고정 보호
+해커가 Admin 계정과 같은 유저 계정의 세션 ID를 탈취해서 Admin 계정처럼 위장해서 요청을 보내는 것을 방지하기 위해 사용
+
+세션 고정 공격의 과정은 아래와 같다
+1. 해커가 서버에 접속해서 세션 쿠키를 하나 생성한다
+2. 해커가 그 쿠키를 User에게 심는다
+3. User가 그 쿠키를 들고 서버에 접속하면 해당 쿠키는 그 User의 권한을 가진 쿠키가 된다
+4. 해커는 그 쿠키를 이용해서 User의 권한을 사용한다
+
+방어를 위한 설정
+- sessionManagement().sessionFixation().none() : 로그인 시 세션 정보 변경 안함 (방어 못함)
+- sessionManagement().sessionFixation().newSession() : 로그인 시 세션 새로 생성
+- sessionManagement().sessionFixation().changeSessionId() : 로그인 시 동일한 세션에 대한 id 변경
