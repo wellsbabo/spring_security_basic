@@ -172,3 +172,8 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
 이 경우 InMemoryUserDetailsManager 클래스를 통해 유저를 등록하면 된다.
 
 하지만 사용할 일은 거의 없을듯하다.
+
+## Http Basic 인증방식
+Http Basic 인증 방식은 아이디와 비밀번호를 Base64 방식으로 인코딩한 뒤 HTTP 인증 헤더에 부착하여 서버측으로 요청을 보내는 방식이다.
+
+Http Basic 방식은 주로 내부망의 서버간 통신을 진행하는 경우 사용합니다. 이 경우는 로그인 페이지도 없고 있다고 하더라도 서버가 서버에게 로그인 페이지에서 로그인을 진행할 수 없기 때문에 사용합니다.
