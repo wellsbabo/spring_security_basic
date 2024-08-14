@@ -60,7 +60,7 @@
 
 ## 회원가입
 유저 엔티티를 만들때 권한 컬럼이 필수적으로 들어가야한다
-```JAVA
+```java
 @Entity
 @Setter
 @Getter
@@ -177,3 +177,102 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
 Http Basic 인증 방식은 아이디와 비밀번호를 Base64 방식으로 인코딩한 뒤 HTTP 인증 헤더에 부착하여 서버측으로 요청을 보내는 방식이다.
 
 Http Basic 방식은 주로 내부망의 서버간 통신을 진행하는 경우 사용합니다. 이 경우는 로그인 페이지도 없고 있다고 하더라도 서버가 서버에게 로그인 페이지에서 로그인을 진행할 수 없기 때문에 사용합니다.
+
+## Role Hierarchy (계층 권한)
+#### 계층권한이란?
+권한 A, 권한 B, 권한 C가 존재하고 권한의 계층은 “A < B < C”라고 설정을 진행하고 싶은 경우 RoleHierarchy 설정을 진행할 수 있다.
+
+예를 들어 Admin 권한은 그 밑의 User 권한까지 모두 포함하도록 만들기위해 사용한다
+
+아래와 같이 SecurityConfig를 설정해서 계층을 설정하면 된다
+```agsl
+@Bean
+public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
+
+    http
+            .csrf((auth) -> auth.disable());
+
+    http
+            .authorizeHttpRequests((auth) -> auth
+                    .requestMatchers("/login").permitAll()
+                    .requestMatchers("/").hasAnyRole("A", "B", "C")
+                    .requestMatchers("/manager").hasAnyRole("B", "C")
+                    .requestMatchers("/admin").hasAnyRole("C")
+                    .anyRequest().authenticated()
+            );
+
+    http
+            .formLogin((auth) -> auth.loginPage("/login")
+                    .loginProcessingUrl("/loginProc")
+                    .permitAll()
+            );
+
+    return http.build();
+}
+```
+하지만 이렇게 설정하면 권한의 개수가 많아졌을때 관리가 힘들기 때문에, 메소드 등록을 통해 권한을 관계를 설정해서 사용하면 좋다
+
+시큐리티 6.3.x 버전 이후 메소드 형식 적용법
+
+- 계층 권한 메소드 등록
+```java
+@Bean
+public RoleHierarchy roleHierarchy() {
+
+    return RoleHierarchyImpl.fromHierarchy("""
+            ROLE_C > ROLE_B
+            ROLE_B > ROLE_A
+            """);
+}
+```
+
+아래와 같이 사용할 수도 있다
+```java
+@Bean
+public RoleHierarchy roleHierarchy() {
+
+    return RoleHierarchyImpl.withDefaultRolePrefix()
+            .role("C").implies("B")
+            .role("B").implies("A")
+            .build();
+}
+```
+
+만약 접두사를 `ROLE_`이 아닌 다른 값으로 하고 싶다면
+```java
+@Bean
+public RoleHierarchy roleHierarchy() {
+
+    return RoleHierarchyImpl.withRolePrefix("접두사_")
+            .role("C").implies("B")
+            .role("B").implies("A")
+            .build();
+}
+```
+
+- SecurityConfig 설정
+```java
+@Bean
+public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
+
+    http
+            .csrf((auth) -> auth.disable());
+
+    http
+            .authorizeHttpRequests((auth) -> auth
+                    .requestMatchers("/login").permitAll()
+                    .requestMatchers("/").hasAnyRole("A")
+                    .requestMatchers("/manager").hasAnyRole("B")
+                    .requestMatchers("/admin").hasAnyRole("C")
+                    .anyRequest().authenticated()
+            );
+
+    http
+            .formLogin((auth) -> auth.loginPage("/login")
+                    .loginProcessingUrl("/loginProc")
+                    .permitAll()
+            );
+
+    return http.build();
+}
+```
