@@ -23,7 +23,7 @@
 
 ---
 
-### SecurityConfig
+## SecurityConfig
 시큐리티 설정을 위한 설정 파일
 @EnableWebSecurity는 보안 설정을 커스터마이징하기 위해서는 SecurityConfig에 붙여야하는 어노테이션
 기본설정을 그대로 사용할 때는 붙이지 않아도되지만 일반적으로는 붙이는게 맞다
@@ -35,7 +35,7 @@
 
 ---
 
-### 커스텀 로그인 설정
+## 커스텀 로그인 설정
 - SecurityConfig 클래스를 등록하기 전에는 접속시 자동으로 스프링 시큐리티 로그인 페이지로 리다이렉팅해줬지만 시큐리티 설정을 등록하고 나서는 이러한 모든 작업을 커스터마이징 해줘야한다
 - 그래서 시큐리티 설정을 등록하고 접속하면 로그인 페이지가 아닌 액세스 거부 에러 페이지가 나온다
 - 이 때 커스텀 로그인 페이지로 리다이렉팅 시켜주기 위해서는 시큐리티 설정에서 formLogin 설정을 해줘야한다
@@ -51,14 +51,14 @@
 
 ---
 
-### 시큐리티 암호화
+## 시큐리티 암호화
 - 스프링 시큐리티는 사용자 인증(로그인)시 비밀번호에 대해 단방향 해시 암호화를 진행하여 저장되어 있는 비밀번호와 대조한다.
 - 따라서 회원가입시 비밀번호 항목에 대해서 암호화를 진행해야 한다.
 - 스프링 시큐리티는 암호화를 위해 BCrypt Password Encoder를 제공하고 권장한다. 따라서 해당 클래스를 return하는 메소드를 만들어 @Bean으로 등록하여 사용하면 된다.
 
 ---
 
-### 회원가입
+## 회원가입
 유저 엔티티를 만들때 권한 컬럼이 필수적으로 들어가야한다
 ```JAVA
 @Entity
@@ -83,7 +83,7 @@ form 태그 관련 질문
 
 ---
 
-### DB 기반 로그인 검증 로직
+## DB 기반 로그인 검증 로직
 로그인을 검증하기 위해서는 `UserDetailService`와 `UserDetails`를 구현해줘야한다
 
 UserDetailService를 통해 UserDetails를 생성해서 SecurityConfig로 보내면, SecurityConfig가 이것을 검증하고, 완료되면 스프링 세션에 저장해주고 사용자가 접근할 수 있도록 허용해준다
@@ -92,12 +92,12 @@ UserDetailService를 통해 UserDetails를 생성해서 SecurityConfig로 보내
 
 ---
 
-### 세션 사용자 아이디 정보
+## 세션 사용자 아이디 정보
 `SecurityContextHolder.getContext().getAuthentication().getName();`
 
 ---
 
-### 세션 설정
+## 세션 설정
 사용자가 로그인을 진행한 뒤 사용자 정보는 SecurityContextHolder에 의해서 서버 세션에 관리된다
 
 그리고 해당 세션에 대한 세션ID는 사용자에게 쿠키로 반환된다
@@ -122,7 +122,7 @@ UserDetailService를 통해 UserDetails를 생성해서 SecurityConfig로 보내
 
 ---
 
-### CSRF enable 설정
+## CSRF enable 설정
 CSRF(Cross-Site Request Forgery)는 요청을 위조하여 사용자가 원하지 않아도 서버측으로 특정 요청을 강제로 보내는 방식이다. (회원 정보 변경, 게시글 CRUD를 사용자 모르게 요청)
 
 기존의 테스트 환경에서와 달리 csrf 시큐리티 설정을 활성화시키면.
@@ -162,4 +162,13 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
 }
 ```
 
-앱에서 사용하는 API 서버의 경우 보통 세션을 STATELESS로 관리하기 떄문에 스프링 시큐리티 csrf를 disable 해도 된다 (JWT와 같은 방식을 사용하면 애초에 세션이 생성되지 않기 떄문)
+앱에서 사용하는 API 서버의 경우 보통 세션을 STATELESS로 관리하기 떄문에 스프링 시큐리티 csrf를 disable 해도 된다 (JWT와 같은 방식을 사용하면 애초에 세션이 생성되지 않기 때문)
+
+---
+
+## InMemory 방식 유저 정보 저장
+토이 프로젝트를 진행하는 경우 또는 시큐리티 로그인 환경이 필요하지만 소수의 회원 정보만 가지며 데이터베이스라는 자원을 투자하기 힘든 경우는 회원가입 없는 InMemory 방식으로 유저를 저장하면 된다.
+
+이 경우 InMemoryUserDetailsManager 클래스를 통해 유저를 등록하면 된다.
+
+하지만 사용할 일은 거의 없을듯하다.
