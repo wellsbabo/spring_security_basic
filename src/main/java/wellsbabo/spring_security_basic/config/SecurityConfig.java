@@ -39,8 +39,8 @@ public class SecurityConfig {
                         .permitAll()    // 모두가 들어올 수 있도록 설정
                 );
 
-        http
-                .csrf((auth) -> auth.disable());
+//        http
+//                .csrf((auth) -> auth.disable());
 
         // 세션 다중 로그인 설정
         http
@@ -54,6 +54,10 @@ public class SecurityConfig {
                 .sessionManagement((auth) -> auth
                         .sessionFixation().changeSessionId());  //로그인 시 동일한 세션에 대한 id 변경
 
+        // 로그 아웃 설정
+        http
+                .logout((auth) -> auth.logoutUrl("/logout")
+                        .logoutSuccessUrl("/"));
 
         return http.build();
     }

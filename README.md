@@ -33,6 +33,8 @@
 - 아래 링크의 문서에 잘 정리되어 있다
 - https://www.devyummi.com/page?id=668bd7fe16014d6810ed85f7
 
+---
+
 ### 커스텀 로그인 설정
 - SecurityConfig 클래스를 등록하기 전에는 접속시 자동으로 스프링 시큐리티 로그인 페이지로 리다이렉팅해줬지만 시큐리티 설정을 등록하고 나서는 이러한 모든 작업을 커스터마이징 해줘야한다
 - 그래서 시큐리티 설정을 등록하고 접속하면 로그인 페이지가 아닌 액세스 거부 에러 페이지가 나온다
@@ -47,10 +49,14 @@
 ```
 - 추가적으로 csrf 토큰을 보내야 로그인이 진행되는데, 시큐리티는 자동으로 csrf 방지 기능을 켜기 때문에, 간단한 테스트를 위해 개발환경에서는 그 설정을 꺼준다
 
+---
+
 ### 시큐리티 암호화
 - 스프링 시큐리티는 사용자 인증(로그인)시 비밀번호에 대해 단방향 해시 암호화를 진행하여 저장되어 있는 비밀번호와 대조한다.
 - 따라서 회원가입시 비밀번호 항목에 대해서 암호화를 진행해야 한다.
 - 스프링 시큐리티는 암호화를 위해 BCrypt Password Encoder를 제공하고 권장한다. 따라서 해당 클래스를 return하는 메소드를 만들어 @Bean으로 등록하여 사용하면 된다.
+
+---
 
 ### 회원가입
 유저 엔티티를 만들때 권한 컬럼이 필수적으로 들어가야한다
@@ -75,6 +81,8 @@ form 태그 관련 질문
 - Q. post라 @RequestBody를 해야한다고 생각하는데 오히려 사용하면 에러가 나고 왜 @Setter를 해야 값이 매핑되는건가요? @AllArgsConstructor는 값을 넣어줄수 없는건가요?
 - 일반적인 form태그에서 보내시면 multipart/form-data 형식으로 보내지기 때문에 json이 아닌 상태로 전송됩니다.따라서 @RequestBody로 받으실 수 없습니다.
 
+---
+
 ### DB 기반 로그인 검증 로직
 로그인을 검증하기 위해서는 `UserDetailService`와 `UserDetails`를 구현해줘야한다
 
@@ -82,8 +90,12 @@ UserDetailService를 통해 UserDetails를 생성해서 SecurityConfig로 보내
 
 = 시큐리티를 통해 인증을 진행하는 방법은 사용자가 Login 페이지를 통해 아이디, 비밀번호를 POST 요청시 스프링 시큐리티가 데이터베이스에 저장된 회원 정보를 조회 후 비밀번호를 검증하고 서버 세션 저장소에 해당 아이디에 대한 세션을 저장한다.
 
+---
+
 ### 세션 사용자 아이디 정보
 `SecurityContextHolder.getContext().getAuthentication().getName();`
+
+---
 
 ### 세션 설정
 사용자가 로그인을 진행한 뒤 사용자 정보는 SecurityContextHolder에 의해서 서버 세션에 관리된다
@@ -107,3 +119,47 @@ UserDetailService를 통해 UserDetails를 생성해서 SecurityConfig로 보내
 - sessionManagement().sessionFixation().none() : 로그인 시 세션 정보 변경 안함 (방어 못함)
 - sessionManagement().sessionFixation().newSession() : 로그인 시 세션 새로 생성
 - sessionManagement().sessionFixation().changeSessionId() : 로그인 시 동일한 세션에 대한 id 변경
+
+---
+
+### CSRF enable 설정
+CSRF(Cross-Site Request Forgery)는 요청을 위조하여 사용자가 원하지 않아도 서버측으로 특정 요청을 강제로 보내는 방식이다. (회원 정보 변경, 게시글 CRUD를 사용자 모르게 요청)
+
+기존의 테스트 환경에서와 달리 csrf 시큐리티 설정을 활성화시키면.
+
+스프링 시큐리티는 CsrfFilter를 통해 POST, PUT, DELETE 요청에 대해서 csrf 토큰 검증을 진행한다
+
+#### 배포환경에서 CSRF 토큰을 집어넣고자 할때
+- POST 요청에서 설정 방법
+```agsl
+<form action="/loginReceiver" method="post" name="loginForm">
+    <input type="text" name="username" placeholder="아이디"/>
+    <input type="password" name="password" placeholder="비밀번호"/>
+    <input type="hidden" name="_csrf" value="{{_csrf.token}}"/>
+    <input type="submit" value="로그인"/>
+</form>
+```
+- ajax 요청시 (HTML <head> 구획에 아래 요소 추가)
+```agsl
+<meta name="_csrf" content="{{_csrf.token}}"/>
+<meta name="_csrf_header" content="{{_csrf.headerName}}"/>
+```
+ajax 요청시 위의 content 값을 가져온 후 함께 요청
+
+XMLHttpRequest 요청시 setRequestHeader를 통해 _csrf, _csrf_header Key에 대한 토큰 값 넣어 요청
+
+#### 로그아웃
+csrf 설정시 POST 요청으로 로그아웃을 진행해야 하지만 아래의 SecurityConfig 설정을 통해 GET 방식으로 진행할 수 있다
+```agsl
+@Bean
+public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
+
+    http
+            .logout((auth) -> auth.logoutUrl("/logout")
+                    .logoutSuccessUrl("/"));
+
+    return http.build();
+}
+```
+
+앱에서 사용하는 API 서버의 경우 보통 세션을 STATELESS로 관리하기 떄문에 스프링 시큐리티 csrf를 disable 해도 된다 (JWT와 같은 방식을 사용하면 애초에 세션이 생성되지 않기 떄문)
