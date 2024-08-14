@@ -5,6 +5,8 @@
 - https://www.devyummi.com/page?id=668bd2d92b88a1ef5f2be2e3
 
 ---
+![시큐리티_모식도](https://github.com/user-attachments/assets/62ffd6c1-aa7a-4c62-b862-c8d2d49d66c7)
+![회원가입모식도](https://github.com/user-attachments/assets/ab8bb7bc-c715-4e22-ab2a-db5f8a117176)
 
 - 시큐리티를 의존성에 추가해놓게 되면 스프링 시큐리티가 클라이언트가 보낸 요청을 가로채서 시큐리티 필터를 통해 검증
 - 해당 경로의 접근이 누구에게 열려있는지
@@ -107,6 +109,7 @@ UserDetailService를 통해 UserDetails를 생성해서 SecurityConfig로 보내
 (JWT 같은 경우는 세션에 계속 머무는게 아닌 세션이 Stateless 상태로 관린된다)
 
 #### 세션 고정 보호
+![세션고정공격](https://github.com/user-attachments/assets/1686db22-74d3-46b0-b47c-33f2e50ad5e5)
 해커가 Admin 계정과 같은 유저 계정의 세션 ID를 탈취해서 Admin 계정처럼 위장해서 요청을 보내는 것을 방지하기 위해 사용
 
 세션 고정 공격의 과정은 아래와 같다
